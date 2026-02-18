@@ -1,0 +1,11 @@
+{
+  "name": "clawnet-test",
+  "version": "1.0.0",
+  "description": "Quick test for ClawNet",
+  "scripts": {
+    "test": "node test-quick.js"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.0"
+  }
+}

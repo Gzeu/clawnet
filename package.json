@@ -1,0 +1,54 @@
+{
+  "name": "clawnet",
+  "version": "0.1.0",
+  "description": "Agent Mesh Platform for OpenClaw - Connect, Collaborate, Context Handoff",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "sdk/js"
+  ],
+  "bin": {
+    "clawnet": "./cli.js"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "cli": "node cli.js",
+    "start": "node cli.js stats",
+    "start:redis": "docker run -d --name clawnet-redis -p 6379:6379 redis:alpine",
+    "stop:redis": "docker stop clawnet-redis && docker rm clawnet-redis",
+    "test:redis": "docker exec clawnet-redis redis-cli ping",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.0"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.3.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "openclaw",
+    "agents",
+    "mesh",
+    "collaboration",
+    "context-handoff",
+    "multi-agent"
+  ],
+  "author": "George Pricop",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gzeu/clawnet"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@clawnet/server",
+  "version": "0.1.0",
+  "description": "ClawNet mesh server",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "clawnet-server": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/cli.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/cli.ts --format cjs,esm --dts --watch",
+    "start": "node dist/cli.js",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@clawnet/core": "workspace:*",
+    "@clawnet/registry": "workspace:*",
+    "@clawnet/message-bus": "workspace:*",
+    "@clawnet/memory": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "license": "MIT"
+}
