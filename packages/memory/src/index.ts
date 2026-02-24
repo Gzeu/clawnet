@@ -79,7 +79,7 @@ export class MemoryStore {
       debug: config.debug || false,
     };
 
-    this.redis = new Redis(this.config.redisUrl || {
+    this.redis = this.config.redisUrl ? new Redis(this.config.redisUrl) : new Redis({
       host: this.config.redisHost,
       port: this.config.redisPort,
       password: this.config.redisPassword || undefined,
@@ -123,10 +123,10 @@ export class MemoryStore {
 
     // Store entry
     const entryKey = this.PREFIX_ENTRY + id;
-    await this.redis.set(entryKey, JSON.stringify(entry), 'PX', ttl);
+    await this.redis.set(entryKey, JSON.stringify(entry), 'EX', Math.ceil(ttl / 1000));
 
     // Index by key
-    await this.redis.set(this.PREFIX_KEY + options.key, id, 'PX', ttl);
+    await this.redis.set(this.PREFIX_KEY + options.key, id, 'EX', Math.ceil(ttl / 1000));
 
     // Index by tags
     if (options.tags) {
@@ -161,7 +161,7 @@ export class MemoryStore {
     };
 
     // Update entry
-    await this.redis.set(this.PREFIX_ENTRY + id, JSON.stringify(updated), 'PX', updated.ttl);
+    await this.redis.set(this.PREFIX_ENTRY + id, JSON.stringify(updated), 'EX', Math.ceil((updated.ttl || this.config.defaultTtl) / 1000));
 
     // Update tag indices if tags changed
     if (updates.tags) {

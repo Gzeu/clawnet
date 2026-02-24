@@ -23,9 +23,10 @@
   },
   "dependencies": {
     "@clawnet/core": "workspace:*",
-    "@clawnet/registry": "workspace:*",
+    "@clawnet/memory": "workspace:*",
     "@clawnet/message-bus": "workspace:*",
-    "@clawnet/memory": "workspace:*"
+    "@clawnet/registry": "workspace:*",
+    "express-rate-limit": "^8.2.1"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

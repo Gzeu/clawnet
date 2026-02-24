@@ -66,6 +66,10 @@ interface PendingRequest {
 // ============================================
 
 export class MessageBus extends EventEmitter<MessageBusEvents> {
+  // Explicitly declare emit to satisfy TypeScript
+  emit<K extends keyof MessageBusEvents>(event: K, ...args: Parameters<MessageBusEvents[K]>): boolean {
+    return super.emit(event, ...args);
+  }
   private config: Required<MessageBusConfig>;
   private publisher: Redis;
   private subscriber: Redis;

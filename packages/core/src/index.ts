@@ -4,6 +4,12 @@
  */
 
 // ============================================
+// AGENT IMPLEMENTATION
+// ============================================
+
+export { Agent as AgentClass } from './agent';
+
+// ============================================
 // AGENT TYPES
 // ============================================
 
@@ -42,7 +48,7 @@ export interface AgentStatus {
   error?: string;
 }
 
-export interface Agent extends AgentId {
+export interface AgentInterface extends AgentId {
   /** Agent capabilities */
   capabilities: AgentCapabilities;
   /** Current status */
@@ -337,7 +343,7 @@ export interface MemorySearchResult {
 
 export interface AgentRegistration {
   /** Agent to register */
-  agent: Agent;
+  agent: AgentInterface;
   /** Authentication token */
   token?: string;
   /** Registration timestamp */
