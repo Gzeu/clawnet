@@ -7,6 +7,42 @@ const http = require('http');
 
 const PORT = process.env.CLAWNET_PORT || 4000;
 
+// Global rate limiting state
+const requestCounts = new Map();
+
+// Rate Limiting Middleware
+const rateLimit = (maxRequests, windowMs) => {
+  return (req, res, next) => {
+    const ip = req.socket.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
+    const now = Date.now();
+    const windowKey = `${ip}:${Math.floor(now / windowMs)}`;
+    
+    if (!requestCounts.has(windowKey)) {
+      requestCounts.set(windowKey, { count: 1, lastReset: now });
+    } else {
+      const record = requestCounts.get(windowKey);
+      if (now - record.lastReset > windowMs) {
+        record.count = 1;
+        record.lastReset = now;
+      } else {
+        record.count++;
+        if (record.count > maxRequests) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: 'Too many requests',
+            message: `Limit of ${maxRequests} requests per ${windowMs / 1000} seconds exceeded.`,
+          }));
+          return;
+        }
+      }
+    }
+    next();
+  };
+};
+
+// Apply rate limiting to critical endpoints
+const applyRateLimit = rateLimit(100, 60 * 1000);
+
 // In-memory storage
 const agents = new Map();
 const memory = new Map();
@@ -25,6 +61,32 @@ function json(res, status, data) {
 
 // Server
 const server = http.createServer((req, res) => {
+  // Apply rate limiting to API endpoints
+  if (req.url.startsWith('/api/v1/')) {
+    const ip = req.socket.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
+    const now = Date.now();
+    const windowKey = `${ip}:${Math.floor(now / 60000)}`;
+    
+    if (!requestCounts.has(windowKey)) {
+      requestCounts.set(windowKey, { count: 1, lastReset: now });
+    } else {
+      const record = requestCounts.get(windowKey);
+      if (now - record.lastReset > 60000) {
+        record.count = 1;
+        record.lastReset = now;
+      } else {
+        record.count++;
+        if (record.count > 100) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: 'Too many requests',
+            message: 'Limit of 100 requests per minute exceeded.'
+          }));
+          return;
+        }
+      }
+    }
+  }
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const path = url.pathname;
 
@@ -43,6 +105,8 @@ const server = http.createServer((req, res) => {
   req.on('data', (chunk) => (body += chunk));
   req.on('end', () => {
     const data = body ? JSON.parse(body) : null;
+    const url = new URL(req.url, `http://localhost:${PORT}`);
+    const path = url.pathname;
 
     // Routes
     if (path === '/health') {
